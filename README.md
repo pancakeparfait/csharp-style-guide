@@ -79,3 +79,13 @@ This style guide is unabashedly modeled from [John Papa's Angular Style Guide](h
   *Why?*: Small functions help avoid hidden bugs that come with large functions that share variables with external scope, create unwanted closures, or unwanted coupling with dependencies.
 
 **[Back to top](#table-of-contents)**
+
+## Testing
+Unit testing helps maintain clean code, as such I included some of my recommendations for unit testing foundations with links for more information.
+
+### Write Tests with Stories
+###### [Style [Y060](#style-y060)]
+
+
+
+**[Back to top](#table-of-contents)**
