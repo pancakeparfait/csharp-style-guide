@@ -113,14 +113,14 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
 
 **[Back to top](#table-of-contents)**
 
-### One Test Class Per Function
+### One Test Class Per Function Under Test
 ###### [Style [SC063](#style-sc063)]
 
 * Create one test class per function under test.
 
   *Why?*: This adheres to SRP. One class tests one function.
   
-  *Why?*: Test classes tend to be much bigger than their class under test, so this keeps LOC per file lower.
+  *Why?*: Test classes tend to be much bigger than their function under test, so this keeps LOC per file lower.
 
 * Name the test class the same as the function under test.
 
@@ -150,7 +150,7 @@ public class GetArPaymentById : ArPaymentServiceTestsBase
 
 **[Back to top](#table-of-contents)**
 
-### Tests Base
+### Tests Base Class
 ###### [Style [SC064](#style-sc064)]
 
 * Create one abstract base class for each Test Class Per Function to inherit.
@@ -161,9 +161,12 @@ public class GetArPaymentById : ArPaymentServiceTestsBase
 
 * Expose a protected member which is the concrete class under test (```ArPaymentService``` in the example).
 
-  *Why?*:
+  *Why?*: In almost every case we should be testing a real implementation of a class.
 
 * Expose a protected Mock of each dependency (```IAxisContext``` in the example).
+
+  *Why?*: 
+
 * Instantiate each
 
 ```csharp
