@@ -87,6 +87,8 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
 ###### [Style [SC060](#style-sc060)]
 
 
+**[Back to top](#table-of-contents)**
+
 ### Testing Libraries
 ###### [Style [SC061](#style-sc061)]
 
@@ -97,6 +99,8 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
 * Use [Moq](https://github.com/Moq/moq4/wiki/Quickstart) for new development. Supplement with [Microsoft Fakes](https://msdn.microsoft.com/en-us/library/hh549175.aspx) to aid in covering otherwise untestable legacy code.
 
   *Why?*: Moq is a robust library used by much of the .NET community. Fakes is available to [users with Visual Studio Enterprise licenses](https://www.visualstudio.com/vs/compare/) and can shim otherwise untestable static methods. Both are stable, well maintained, and provide robust testing features.
+
+**[Back to top](#table-of-contents)**
   
 ### Test Runner
 ###### [Style [SC062](#style-sc062)]
@@ -106,6 +110,8 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
   *Why?*: ReSharper Test Runner has an incredibly user-friendly interface that includes a Projects and Namespaces tree grouping of unit tests that is easy to navigate.
   
   *Why?*: The Cover Tests option offers a visual aid (Toggle Code Highlighting) to determine whether unit tests cover all implementation logic.
+
+**[Back to top](#table-of-contents)**
 
 ### One Test Class Per Function
 ###### [Style [SC063](#style-sc063)]
@@ -142,6 +148,8 @@ public class GetArPaymentById : ArPaymentServiceTestsBase
 }
 ```
 
+**[Back to top](#table-of-contents)**
+
 ### Tests Base
 ###### [Style [SC064](#style-sc064)]
 
@@ -176,7 +184,5 @@ public abstract class ArPaymentServiceTestsBase
     }
 }
 ```
-
-
 
 **[Back to top](#table-of-contents)**
