@@ -194,4 +194,54 @@ public abstract class ArPaymentServiceTestsBase
 
 **[Back to top](#table-of-contents)**
 
-### Overr
+### Arrange Code
+###### [Style [SC065](#style-sc065)]
+
+* Keep arrangement code close to relevant test code.
+
+  *Why?*: We don't want shared arrangement code to be duplicated.
+  
+  *Why?*: It is easier to read and understand why specific arrangement code is defined in its specific context (test method, test class, or base test class).
+
+```csharp
+public class ArPaymentService : ServiceBase, IArPaymentService
+{
+    // function under test
+    public ArPayment GetArPaymentById(int id, params Expression<Func<ArPayment, object>>[] includes)
+    {
+        if (id <= 0) throw new ArgumentException($"{nameof(id)} must be greater than zero.", nameof(id));
+
+        var arPayment = DbContext.ArPayments // dependency on DbContext.ArPayments must be configured in Arrange()
+            .IncludeMany(includes)
+            .SingleOrDefault(x => x.Id == id);
+        if (arPayment == null) throw new ApplicationException($"Unable to find {nameof(ArPayment)} with Id {id}.");
+
+        return arPayment;
+    }
+}
+```
+
+```csharp
+[TestClass]
+public class GetArPaymentById : ArPaymentServiceTestsBase
+{
+    // defined as class field since all traversals of function under test require this
+    private Mock<MockHelper.MockableDbSetWithExtensions<ArPayment>> _dbArPayments;
+
+    [TestInitialize]
+    public override void Arrange()
+    {
+        base.Arrange(); // don't forget the base arrange
+
+        // use MockHelper to assist in onerous DbSet mocking
+        _dbArPayments = MockHelper.CreateMockDbSet(new List<ArPayment> { new ArPayment { Id = 1 } });
+
+        // arrange behavior of Context.ArPayments
+        Context
+            .Setup(x => x.ArPayments)
+            .Returns(() => _dbArPayments.Object);
+    }
+}
+```
+
+**[Back to top](#table-of-contents)**
