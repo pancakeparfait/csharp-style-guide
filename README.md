@@ -163,11 +163,15 @@ public class GetArPaymentById : ArPaymentServiceTestsBase
 
   *Why?*: In almost every case we should be testing a real implementation of a class.
 
-* Expose a protected Mock of each dependency (```IAxisContext``` in the example).
+* Expose a protected Mock of each dependency (```IAxisContext``` in the example) and instantiate each.
 
-  *Why?*: 
+  *Why?*: Test classes inherit from the test base class and need access to the dependency instances in order to arrange their behavior.
 
-* Instantiate each
+  *Why?*: Test classes won't have to worry about initializing the dependencies, only arranging their behavior.
+
+* Create a ```public virtual void Arrange()``` function and decorate it with ```[TestInitialize]```.
+
+  *Why?*: The attribute indicates the function will be run before each test, and the name *Arrange* follows Microsoft's *Arrange, Act, Assert* pattern for unit testing. The virtual keyword permits inheriting classes to extend the arrange logic.
 
 ```csharp
 [TestClass]
@@ -189,3 +193,5 @@ public abstract class ArPaymentServiceTestsBase
 ```
 
 **[Back to top](#table-of-contents)**
+
+### Overr
