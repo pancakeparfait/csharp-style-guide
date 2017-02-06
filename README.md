@@ -86,7 +86,6 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
 ### Write Tests with Stories
 ###### [Style [SC060](#style-sc060)]
 
-
 **[Back to top](#table-of-contents)**
 
 ### Testing Libraries
@@ -113,8 +112,25 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
 
 **[Back to top](#table-of-contents)**
 
-### One Test Class Per Function Under Test
+### One Folder Per Class Under Test
 ###### [Style [SC063](#style-sc063)]
+
+* Create a ```<ClassUnderTest>Tests``` folder in which to put the ```<FunctionUnderTest>.cs``` files.
+
+  *Why?*: Organizing all functions under test into a shared class under test folder relates the test files in a shared namespace and location.
+  
+  ```
+  Axis.Services.Implementation.UnitTests.csproj /
+    ArPaymentServiceTests /
+      ArPaymentServiceTestsBase.cs
+      GetArPaymentById.cs
+      ...
+  ```
+
+**[Back to top](#table-of-contents)**
+
+### One Test Class Per Function Under Test
+###### [Style [SC064](#style-sc064)]
 
 * Create one test class per function under test.
 
@@ -128,30 +144,47 @@ Unit testing helps maintain clean code, as such I included some of my recommenda
   
   *Why?*: A solution-wide search for the function by name will also discover its test class.
 
-```csharp
-/* class under test */
-public ArPaymentService : ServiceBase
-{
-    /* function under test */
-    public ArPayment GetArPaymentById(int id) {
-        // ...
-    }
-}
-```
+  ```csharp
+  /* class under test */
+  public ArPaymentService : ServiceBase
+  {
+      /* function under test */
+      public ArPayment GetArPaymentById(int id) {
+          // ...
+      }
+  }
+  ```
 
-```csharp
-/* single test class */
-[TestClass]
-public class GetArPaymentById : ArPaymentServiceTestsBase
-{
-    // ...
-}
-```
+  ```csharp
+  /* single test class */
+  [TestClass]
+  public class GetArPaymentById : ArPaymentServiceTestsBase
+  {
+      // ...
+  }
+  ```
+
+* Create a private method ```Act()``` that both calls and shares a return type with the *function under test*.
+
+  *Why?*: The name *Act* follows Microsoft's *Arrange, Act, Assert* pattern for unit testing.
+  
+  *Why?*: Encapsulating the function under test call makes refactoring simpler since you will have one line of code to update instead of one per test method.
+  
+  ```csharp
+  [TestClass]
+  public class GetArPaymentById : ArPaymentServiceTestsBase
+  {
+      private ArPayment Act(int id /* pass through any parameters that may vary in your tests */)
+      {
+          return Service.GetArPaymentById(id, x => x.ArInvoicePayments /* this parameter can only be meaningfully tested in database integration */);
+      }
+  }
+  ```
 
 **[Back to top](#table-of-contents)**
 
 ### Tests Base Class
-###### [Style [SC064](#style-sc064)]
+###### [Style [SC065](#style-sc065)]
 
 * Create one abstract base class for each Test Class Per Function to inherit.
 
@@ -173,29 +206,29 @@ public class GetArPaymentById : ArPaymentServiceTestsBase
 
   *Why?*: The attribute indicates the function will be run before each test, and the name *Arrange* follows Microsoft's *Arrange, Act, Assert* pattern for unit testing. The virtual keyword permits inheriting classes to extend the arrange logic.
 
-```csharp
-[TestClass]
-public abstract class ArPaymentServiceTestsBase
-{
-    protected ArPaymentService Service;
+  ```csharp
+  [TestClass]
+  public abstract class ArPaymentServiceTestsBase
+  {
+      protected ArPaymentService Service;
 
-    protected Mock<IAxisContext> Context;
+      protected Mock<IAxisContext> Context;
 
-    [TestInitialize]
-    public virtual void Arrange()
-    {
-        Context = new Mock<IAxisContext>();
+      [TestInitialize]
+      public virtual void Arrange()
+      {
+          Context = new Mock<IAxisContext>();
 
-        Service = new ArPaymentService(
-            Context.Object);
-    }
-}
-```
+          Service = new ArPaymentService(
+              Context.Object);
+      }
+  }
+  ```
 
 **[Back to top](#table-of-contents)**
 
 ### Arrange Code
-###### [Style [SC065](#style-sc065)]
+###### [Style [SC066](#style-sc066)]
 
 * Keep arrangement code close to relevant test code.
 
@@ -203,45 +236,45 @@ public abstract class ArPaymentServiceTestsBase
   
   *Why?*: It is easier to read and understand why specific arrangement code is defined in its specific context (test method, test class, or base test class).
 
-```csharp
-public class ArPaymentService : ServiceBase, IArPaymentService
-{
-    // function under test
-    public ArPayment GetArPaymentById(int id, params Expression<Func<ArPayment, object>>[] includes)
-    {
-        if (id <= 0) throw new ArgumentException($"{nameof(id)} must be greater than zero.", nameof(id));
+  ```csharp
+  public class ArPaymentService : ServiceBase, IArPaymentService
+  {
+      // function under test
+      public ArPayment GetArPaymentById(int id, params Expression<Func<ArPayment, object>>[] includes)
+      {
+          if (id <= 0) throw new ArgumentException($"{nameof(id)} must be greater than zero.", nameof(id));
 
-        var arPayment = DbContext.ArPayments // dependency on DbContext.ArPayments must be configured in Arrange()
-            .IncludeMany(includes)
-            .SingleOrDefault(x => x.Id == id);
-        if (arPayment == null) throw new ApplicationException($"Unable to find {nameof(ArPayment)} with Id {id}.");
+          var arPayment = DbContext.ArPayments // dependency on DbContext.ArPayments must be configured in Arrange()
+              .IncludeMany(includes)
+              .SingleOrDefault(x => x.Id == id);
+          if (arPayment == null) throw new ApplicationException($"Unable to find {nameof(ArPayment)} with Id {id}.");
 
-        return arPayment;
-    }
-}
-```
+          return arPayment;
+      }
+  }
+  ```
 
-```csharp
-[TestClass]
-public class GetArPaymentById : ArPaymentServiceTestsBase
-{
-    // defined as class field since all traversals of function under test require this
-    private Mock<MockHelper.MockableDbSetWithExtensions<ArPayment>> _dbArPayments;
+  ```csharp
+  [TestClass]
+  public class GetArPaymentById : ArPaymentServiceTestsBase
+  {
+      // defined as class field since all traversals of function under test require this
+      private Mock<MockHelper.MockableDbSetWithExtensions<ArPayment>> _dbArPayments;
 
-    [TestInitialize]
-    public override void Arrange()
-    {
-        base.Arrange(); // don't forget the base arrange
+      [TestInitialize]
+      public override void Arrange()
+      {
+          base.Arrange(); // don't forget the base arrange
 
-        // use MockHelper to assist in onerous DbSet mocking
-        _dbArPayments = MockHelper.CreateMockDbSet(new List<ArPayment> { new ArPayment { Id = 1 } });
+          // use MockHelper to assist in onerous DbSet mocking
+          _dbArPayments = MockHelper.CreateMockDbSet(new List<ArPayment> { new ArPayment { Id = 1 } });
 
-        // arrange behavior of Context.ArPayments
-        Context
-            .Setup(x => x.ArPayments)
-            .Returns(() => _dbArPayments.Object);
-    }
-}
-```
+          // arrange behavior of Context.ArPayments
+          Context
+              .Setup(x => x.ArPayments)
+              .Returns(() => _dbArPayments.Object);
+      }
+  }
+  ```
 
 **[Back to top](#table-of-contents)**
